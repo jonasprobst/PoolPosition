@@ -19,12 +19,14 @@ import ch.poolposition.app.notify.Notifier
 class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
+        val force = inputData.getBoolean(KEY_FORCE_ALL, false)
         val store = WatchStore(applicationContext)
         val watches = store.load()
         val now = System.currentTimeMillis()
 
         val updated = watches.map { watch ->
-            if (!watch.enabled || !isDue(watch, now)) return@map watch
+            if (!watch.enabled) return@map watch
+            if (!force && !isDue(watch, now)) return@map watch
             checkOne(watch, now)
         }
 
@@ -63,5 +65,10 @@ class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, 
             lastHash = result.newHash,
             lastKeywordPresent = result.newKeywordPresent,
         )
+    }
+
+    companion object {
+        /** When true, check every enabled watch immediately, ignoring its interval. */
+        const val KEY_FORCE_ALL = "force_all"
     }
 }

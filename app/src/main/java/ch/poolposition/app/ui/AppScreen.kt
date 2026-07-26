@@ -66,6 +66,18 @@ fun AppScreen(
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
+                            text = { Text("Check now") },
+                            onClick = {
+                                menuOpen = false
+                                CheckScheduler.checkNow(context)
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Checking all watches now…",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
+                            },
+                        )
+                        DropdownMenuItem(
                             text = { Text("Enable notifications") },
                             onClick = { menuOpen = false; onRequestNotifications() },
                         )
