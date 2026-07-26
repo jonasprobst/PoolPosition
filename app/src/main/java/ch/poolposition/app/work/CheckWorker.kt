@@ -34,7 +34,7 @@ class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, 
         val reason = when {
             onlyId != null -> "baseline-on-save"
             force -> "check-now"
-            else -> "periodic"
+            else -> "scheduled/background"
         }
         Logger.log(applicationContext, "Worker running ($reason) over ${watches.size} watch(es)")
 
