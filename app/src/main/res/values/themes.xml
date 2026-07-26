@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base launch theme. In-app colors are handled by Compose MaterialTheme;
+         this platform theme keeps us free of the Material Components dependency. -->
+    <style name="Theme.PoolPosition" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
