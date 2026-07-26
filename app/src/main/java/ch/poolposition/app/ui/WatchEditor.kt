@@ -2,6 +2,8 @@ package ch.poolposition.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
@@ -29,7 +31,7 @@ import ch.poolposition.app.model.Watch
  * Add/edit dialog for a single watch. [isNew] toggles the Delete button.
  * Interval is clamped to the 15-minute minimum on save.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WatchEditor(
     initial: Watch,
@@ -82,7 +84,7 @@ fun WatchEditor(
                 )
 
                 Text("Trigger when the page…")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ModeChip("changes", mode == TriggerMode.CHANGED) { mode = TriggerMode.CHANGED }
                     ModeChip("shows word", mode == TriggerMode.APPEARS) { mode = TriggerMode.APPEARS }
                     ModeChip("drops word", mode == TriggerMode.DISAPPEARS) { mode = TriggerMode.DISAPPEARS }
