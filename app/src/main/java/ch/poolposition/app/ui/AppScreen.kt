@@ -21,6 +21,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,16 @@ fun AppScreen(
         CheckScheduler.reschedule(context)
     }
 
+    // Keep the list in sync with the store, which the background worker updates
+    // on disk. Only reassign when something actually changed to avoid churn.
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(3_000)
+            val fresh = store.load()
+            if (fresh != watches) watches = fresh
+        }
+    }
+
     if (showLog) {
         LogScreen(onClose = { showLog = false; reload() })
         return
@@ -84,10 +95,6 @@ fun AppScreen(
                                     android.widget.Toast.LENGTH_SHORT,
                                 ).show()
                             },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Refresh") },
-                            onClick = { menuOpen = false; reload() },
                         )
                         DropdownMenuItem(
                             text = { Text("View log") },
