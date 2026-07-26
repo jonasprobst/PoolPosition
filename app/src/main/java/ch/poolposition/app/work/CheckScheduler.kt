@@ -9,9 +9,10 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import ch.poolposition.app.core.Logger
 import java.util.concurrent.TimeUnit
 
-/** Schedules the single periodic check job. */
+/** Schedules the periodic check job and the on-demand one-shot runs. */
 object CheckScheduler {
 
     private const val WORK_NAME = "poolposition-periodic-check"
@@ -27,6 +28,7 @@ object CheckScheduler {
             ExistingPeriodicWorkPolicy.KEEP,
             buildRequest(),
         )
+        Logger.log(context, "Periodic check ensured (every 15 min, network-constrained)")
     }
 
     /** Kick off a check now-ish and reset the schedule (used after edits). */
@@ -36,6 +38,7 @@ object CheckScheduler {
             ExistingPeriodicWorkPolicy.UPDATE,
             buildRequest(),
         )
+        Logger.log(context, "Periodic check rescheduled")
     }
 
     /**
@@ -45,22 +48,34 @@ object CheckScheduler {
     fun checkNow(context: Context) {
         val request = OneTimeWorkRequestBuilder<CheckWorker>()
             .setInputData(workDataOf(CheckWorker.KEY_FORCE_ALL to true))
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
+            .setConstraints(networkConstraint())
             .build()
         WorkManager.getInstance(context)
             .enqueueUniqueWork(CHECK_NOW_NAME, ExistingWorkPolicy.REPLACE, request)
+        Logger.log(context, "Check-now requested")
     }
+
+    /** Fetch a single watch and record its baseline (no alert). Used on save. */
+    fun baselineNow(context: Context, watchId: String) {
+        val request = OneTimeWorkRequestBuilder<CheckWorker>()
+            .setInputData(
+                workDataOf(
+                    CheckWorker.KEY_WATCH_ID to watchId,
+                    CheckWorker.KEY_BASELINE_ONLY to true,
+                ),
+            )
+            .setConstraints(networkConstraint())
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork("poolposition-baseline-$watchId", ExistingWorkPolicy.REPLACE, request)
+        Logger.log(context, "Baseline-on-save requested")
+    }
+
+    private fun networkConstraint() =
+        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
 
     private fun buildRequest() =
         PeriodicWorkRequestBuilder<CheckWorker>(15, TimeUnit.MINUTES)
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
+            .setConstraints(networkConstraint())
             .build()
 }

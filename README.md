@@ -108,6 +108,16 @@ Waiting 15 minutes per check is slow, so:
   via GitHub Pages (see the `gh-pages` branch / `GET-STARTED-TESTING.md` there):
   point a `changed` watch at your Pages URL, edit the page, and re-check.
 
+Diagnostics built in:
+
+- **Saving a watch auto-fetches its baseline** immediately (no alert), so the
+  next real change fires without a manual first check.
+- Each watch card shows **when it was last checked** and the **last outcome**
+  (e.g. *Baseline set*, *No change*, *TRIGGERED*, *Fetch failed: …*). Use
+  **⋮ → Refresh** to reload after a check.
+- **⋮ → View log** shows a diagnostic log: scheduling, each worker run, fetch
+  results, evaluation outcomes, and notifications posted.
+
 Note: real-world timing depends on the OS. The 15-minute interval is a floor,
 not a guarantee — Android batches background work, so scheduled fires can drift,
 especially in Doze. "Unrestricted" battery helps most.

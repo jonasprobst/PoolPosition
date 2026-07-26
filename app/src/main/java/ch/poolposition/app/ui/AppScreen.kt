@@ -48,11 +48,19 @@ fun AppScreen(
     var watches by remember { mutableStateOf(store.load()) }
     var editing by remember { mutableStateOf<Editing?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
+    var showLog by remember { mutableStateOf(false) }
+
+    fun reload() { watches = store.load() }
 
     fun persist(newList: List<Watch>) {
         watches = newList
         store.save(newList)
         CheckScheduler.reschedule(context)
+    }
+
+    if (showLog) {
+        LogScreen(onClose = { showLog = false; reload() })
+        return
     }
 
     Scaffold(
@@ -76,6 +84,14 @@ fun AppScreen(
                                     android.widget.Toast.LENGTH_SHORT,
                                 ).show()
                             },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Refresh") },
+                            onClick = { menuOpen = false; reload() },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("View log") },
+                            onClick = { menuOpen = false; showLog = true },
                         )
                         DropdownMenuItem(
                             text = { Text("Enable notifications") },
@@ -145,6 +161,16 @@ fun AppScreen(
                     watches.map { if (it.id == saved.id) saved else it }
                 }
                 persist(newList)
+                // Freshly saved / re-baselined watch: fetch its baseline now so the
+                // next real change fires, instead of waiting for the first check.
+                if (saved.enabled && saved.lastCheckedAt == 0L) {
+                    CheckScheduler.baselineNow(context, saved.id)
+                    android.widget.Toast.makeText(
+                        context,
+                        "Fetching baseline…",
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                }
                 editing = null
             },
             onDelete = {
@@ -180,6 +206,12 @@ private fun WatchCard(watch: Watch, onClick: () -> Unit, onToggle: (Boolean) -> 
                     "${modeLabel(watch)} · every ${watch.intervalMinutes} min",
                     style = MaterialTheme.typography.labelMedium,
                 )
+                Text(
+                    statusLine(watch),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             Switch(checked = watch.enabled, onCheckedChange = onToggle)
         }
@@ -190,4 +222,13 @@ private fun modeLabel(watch: Watch): String = when (watch.mode) {
     TriggerMode.CHANGED -> "changes"
     TriggerMode.APPEARS -> "“${watch.keyword}” appears"
     TriggerMode.DISAPPEARS -> "“${watch.keyword}” disappears"
+}
+
+private fun statusLine(watch: Watch): String {
+    val checked = if (watch.lastCheckedAt == 0L) {
+        "never checked"
+    } else {
+        "checked " + android.text.format.DateUtils.getRelativeTimeSpanString(watch.lastCheckedAt)
+    }
+    return checked + (watch.lastResult?.let { " · $it" } ?: "")
 }

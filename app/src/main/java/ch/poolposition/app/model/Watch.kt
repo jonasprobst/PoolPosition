@@ -38,6 +38,8 @@ data class Watch(
     val lastHash: String? = null,
     /** Baseline keyword presence for keyword modes; null until first check. */
     val lastKeywordPresent: Boolean? = null,
+    /** Human-readable outcome of the most recent check; null until first check. */
+    val lastResult: String? = null,
 ) {
     companion object {
         const val MIN_INTERVAL_MINUTES = 15

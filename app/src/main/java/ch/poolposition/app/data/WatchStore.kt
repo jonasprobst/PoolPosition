@@ -51,6 +51,7 @@ class WatchStore(context: Context) {
             null -> put("lastKeywordPresent", JSONObject.NULL)
             else -> put("lastKeywordPresent", p)
         }
+        put("lastResult", w.lastResult ?: JSONObject.NULL)
     }
 
     private fun fromJson(o: JSONObject): Watch = Watch(
@@ -66,6 +67,7 @@ class WatchStore(context: Context) {
         lastHash = if (o.isNull("lastHash")) null else o.optString("lastHash"),
         lastKeywordPresent = if (o.isNull("lastKeywordPresent")) null
         else o.optBoolean("lastKeywordPresent"),
+        lastResult = if (o.isNull("lastResult")) null else o.optString("lastResult").ifEmpty { null },
     )
 
     companion object {
