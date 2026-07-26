@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pool Position — Test Page</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    code { background: #eef; padding: 0 .25rem; border-radius: .2rem; }
+    .status { font-size: 1.6rem; font-weight: 700; padding: 1rem; border-radius: .5rem; background: #fdecea; color: #a61b0b; }
+    .open { background: #e7f6e7; color: #1b7a1b; }
+    ol { padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h1>Pool Position — Test Page</h1>
+
+  <p>Edit this file on the <code>gh-pages</code> branch to test the app's trigger
+  modes against a page you control.</p>
+
+  <!-- ===== TEST MARKER: change the text below to trigger `changed` ===== -->
+  <p class="status">Anmeldung noch nicht möglich</p>
+  <!-- ================================================================== -->
+
+  <h2>How to test</h2>
+  <ol>
+    <li>In the app, add a watch pointing at this page's URL.</li>
+    <li>Tap <strong>⋮ → Check now</strong> once. The first check just records a
+      baseline (no alert) — this is expected.</li>
+    <li>Edit this page and commit (see below), wait a few seconds for the change
+      to publish, then tap <strong>Check now</strong> again. The watch should
+      fire.</li>
+  </ol>
+
+  <h3>By mode</h3>
+  <ul>
+    <li><strong>changed</strong> — change any visible text (e.g. the status line
+      above) and re-check.</li>
+    <li><strong>disappears</strong> — keyword
+      <code>Anmeldung noch nicht möglich</code>: remove/replace the status line,
+      then re-check. (This mirrors the real Bern site.)</li>
+    <li><strong>appears</strong> — keyword <code>Jetzt anmelden</code>: add that
+      phrase to the page, then re-check.</li>
+  </ul>
+
+  <h3>Editing quickly</h3>
+  <p>Open <code>index.html</code> on the <code>gh-pages</code> branch on GitHub,
+  click the pencil, change the status line (for example to
+  <code>Jetzt anmelden</code>), and commit. GitHub Pages republishes within a
+  few seconds.</p>
+
+  <p><small>Served by GitHub Pages from the <code>gh-pages</code> branch of this
+  repo.</small></p>
+</body>
+</html>
