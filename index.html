@@ -15,41 +15,41 @@
 <body>
   <h1>Pool Position — Test Page</h1>
 
-  <p>Edit this file on the <code>gh-pages</code> branch to test the app's trigger
-  modes against a page you control.</p>
+  <p>Edit this file on the <code>gh-pages</code> branch to test the app against a
+  page you control.</p>
 
-  <!-- ===== TEST MARKER: change the text below to trigger `changed` ===== -->
-  <p class="status open">Jetzt anmelden — Anmeldung offen!</p>
-  <!-- ================================================================== -->
+  <!-- ============================================================== -->
+  <!-- STATUS LINE: the ONLY place a trigger keyword may appear.       -->
+  <!-- Closed:  <p class="status">Anmeldung noch nicht möglich</p>     -->
+  <!-- Open:    <p class="status open">Jetzt anmelden</p>              -->
+  <!-- ============================================================== -->
+  <p class="status">Anmeldung noch nicht möglich</p>
+  <!-- ============================================================== -->
 
   <h2>How to test</h2>
   <ol>
-    <li>In the app, add a watch pointing at this page's URL.</li>
-    <li>Tap <strong>⋮ → Check now</strong> once. The first check just records a
-      baseline (no alert) — this is expected.</li>
-    <li>Edit this page and commit (see below), wait a few seconds for the change
-      to publish, then tap <strong>Check now</strong> again. The watch should
-      fire.</li>
+    <li>Add a watch pointing at this page's URL (or use the seeded one).</li>
+    <li>Save it — the app fetches a baseline automatically (no alert).</li>
+    <li>Flip the status line above (closed ⇄ open, see the comment in the HTML
+      source), commit, wait a few seconds for Pages to publish.</li>
+    <li>In the app tap <strong>⋮ → Check now</strong>, then
+      <strong>Refresh</strong>. The watch should fire.</li>
   </ol>
 
-  <h3>By mode</h3>
+  <h3>What each mode keys off</h3>
   <ul>
-    <li><strong>changed</strong> — change any visible text (e.g. the status line
-      above) and re-check.</li>
-    <li><strong>disappears</strong> — keyword
-      <code>Anmeldung noch nicht möglich</code>: remove/replace the status line,
-      then re-check. (This mirrors the real Bern site.)</li>
-    <li><strong>appears</strong> — keyword <code>Jetzt anmelden</code>: add that
-      phrase to the page, then re-check.</li>
+    <li><strong>changed</strong> — any edit to the status line (the visible text
+      hash changes).</li>
+    <li><strong>disappears</strong> — the closed-state phrase in the status line
+      goes away when you switch to open.</li>
+    <li><strong>appears</strong> — the open-state phrase shows up when you switch
+      from closed to open.</li>
   </ul>
 
-  <h3>Editing quickly</h3>
-  <p>Open <code>index.html</code> on the <code>gh-pages</code> branch on GitHub,
-  click the pencil, change the status line (for example to
-  <code>Jetzt anmelden</code>), and commit. GitHub Pages republishes within a
-  few seconds.</p>
+  <p><strong>Important:</strong> keep the trigger phrases only inside the status
+  line above. If the same words appear elsewhere in this page, a keyword watch
+  will always see them and never fire.</p>
 
-  <p><small>Served by GitHub Pages from the <code>gh-pages</code> branch of this
-  repo.</small></p>
+  <p><small>Served by GitHub Pages from the <code>gh-pages</code> branch.</small></p>
 </body>
 </html>
