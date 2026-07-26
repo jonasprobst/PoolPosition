@@ -73,11 +73,16 @@ class WatchStore(context: Context) {
 
         fun newId(): String = UUID.randomUUID().toString()
 
-        /** The pre-seeded Bern swim registration watch. */
+        /**
+         * The pre-seeded example watch. Points at this repo's GitHub Pages test
+         * page so a fresh install is testable immediately; uses the same mode and
+         * keyword as the real Bern registration site. Swap the URL to
+         * https://anmeldung.bernschwimmt.ch/ for the live watch.
+         */
         fun seedWatch(): Watch = Watch(
             id = UUID.randomUUID().toString(),
-            label = "Bern swim",
-            url = "https://anmeldung.bernschwimmt.ch/",
+            label = "Test page (gh-pages)",
+            url = "https://jonasprobst.github.io/PoolPosition/",
             intervalMinutes = 15,
             mode = TriggerMode.DISAPPEARS,
             keyword = "Anmeldung noch nicht möglich",

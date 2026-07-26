@@ -19,9 +19,12 @@ in your browser.
 - A **WorkManager** job runs every 15 minutes and checks each enabled watch whose
   interval has elapsed. Low battery impact; no foreground service.
 - **High-priority, vibrating notification** on trigger; tap to open the URL.
-- Pre-seeded example: **Bern swim** — <https://anmeldung.bernschwimmt.ch/>,
-  mode `disappears`, keyword *"Anmeldung noch nicht möglich"* (shown on every
-  course while registration is closed; it disappears when registration opens).
+- Pre-seeded example: a **Test page** watch pointing at this repo's
+  [GitHub Pages test page](https://jonasprobst.github.io/PoolPosition/), mode
+  `disappears`, keyword *"Anmeldung noch nicht möglich"* — so a fresh install is
+  testable immediately. Swap its URL to <https://anmeldung.bernschwimmt.ch/> for
+  the real Bern registration watch (same mode/keyword: the phrase shows on every
+  course while registration is closed and disappears when it opens).
 - **Check now** action (overflow menu) to force an immediate check of all
   watches without waiting for the interval — handy for testing.
 
