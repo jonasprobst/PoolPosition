@@ -22,9 +22,7 @@ in your browser.
 - Pre-seeded example: a **Test page** watch pointing at this repo's
   [GitHub Pages test page](https://jonasprobst.github.io/PoolPosition/), mode
   `disappears`, keyword *"Anmeldung noch nicht möglich"* — so a fresh install is
-  testable immediately. Swap its URL to <https://anmeldung.bernschwimmt.ch/> for
-  the real Bern registration watch (same mode/keyword: the phrase shows on every
-  course while registration is closed and disappears when it opens).
+  testable immediately.
 - **Check now** action (overflow menu) to force an immediate check of all
   watches without waiting for the interval — handy for testing.
 
