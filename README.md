@@ -29,9 +29,10 @@ in your browser.
   watches without waiting for the interval — handy for testing.
 - **Precision mode** (per watch): for a time-critical opening, switch a watch's
   check style to exact, Doze-proof checks down to a 1-minute interval. Uses
-  `AlarmManager` alarm-clock scheduling (no special permission; shows an alarm
-  icon while armed), costs more battery, and is one-shot — it **turns the watch
-  off once it fires**. Re-armed on reboot and app start.
+  `AlarmManager` alarm-clock scheduling (declares `USE_EXACT_ALARM`, auto-granted
+  for sideloaded installs; shows an alarm icon while armed), costs more battery,
+  and is one-shot — it **turns the watch off once it fires**. Re-armed on reboot
+  and app start.
 
 ## Design decisions
 
@@ -131,3 +132,6 @@ especially in Doze. "Unrestricted" battery helps most.
 
 - `INTERNET` — fetch watched pages.
 - `POST_NOTIFICATIONS` — deliver alerts (requested at runtime on Android 13+).
+- `USE_EXACT_ALARM` / `SCHEDULE_EXACT_ALARM` — exact alarms for Precision mode
+  (auto-granted; needed so precision checks fire on time even in Doze).
+- `RECEIVE_BOOT_COMPLETED` — re-arm precision watches after a reboot.
