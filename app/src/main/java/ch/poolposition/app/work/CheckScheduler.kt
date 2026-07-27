@@ -10,6 +10,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import ch.poolposition.app.core.Logger
+import ch.poolposition.app.model.Watch
 import java.util.concurrent.TimeUnit
 
 /** Schedules the periodic check job and the on-demand one-shot runs. */
@@ -19,26 +20,19 @@ object CheckScheduler {
     private const val CHECK_NOW_NAME = "poolposition-check-now"
 
     /**
-     * Ensure the 15-minute periodic check is scheduled. Uses KEEP so an existing
-     * schedule survives app restarts; call [reschedule] to force a refresh.
+     * Keep the 15-minute periodic job scheduled only while there is at least one
+     * enabled, non-precision watch to check. When there's nothing to watch, the
+     * job is cancelled so the app does no background work at all. (Precision
+     * watches run on their own exact-alarm chain, so they don't need it.)
      */
-    fun ensureScheduled(context: Context) {
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            buildRequest(),
-        )
-        Logger.log(context, "Periodic check ensured (every 15 min, network-constrained)")
-    }
-
-    /** Kick off a check now-ish and reset the schedule (used after edits). */
-    fun reschedule(context: Context) {
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            buildRequest(),
-        )
-        Logger.log(context, "Periodic check rescheduled")
+    fun syncPeriodic(context: Context, watches: List<Watch>) {
+        val needed = watches.any { it.enabled && !it.precision }
+        val wm = WorkManager.getInstance(context)
+        if (needed) {
+            wm.enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, buildRequest())
+        } else {
+            wm.cancelUniqueWork(WORK_NAME)
+        }
     }
 
     /**

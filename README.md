@@ -17,7 +17,9 @@ in your browser.
   - `appears` — a keyword went from absent to present.
   - `disappears` — a keyword went from present to absent.
 - A **WorkManager** job runs every 15 minutes and checks each enabled watch whose
-  interval has elapsed. Low battery impact; no foreground service.
+  interval has elapsed. Low battery impact; no foreground service. The job is
+  cancelled entirely when there is no enabled, non-precision watch, so the app is
+  fully idle when there's nothing to watch.
 - **High-priority, vibrating notification** on trigger; tap to open the URL.
 - Pre-seeded example: a **Test page** watch pointing at this repo's
   [GitHub Pages test page](https://jonasprobst.github.io/PoolPosition/), mode

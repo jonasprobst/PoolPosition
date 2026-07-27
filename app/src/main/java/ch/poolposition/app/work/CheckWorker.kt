@@ -57,6 +57,9 @@ class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, 
         }
 
         store.save(watches)
+        // Reconcile the periodic job with the current watch set (e.g. a precision
+        // watch that just auto-stopped now needs the normal 15-min job again).
+        CheckScheduler.syncPeriodic(applicationContext, watches)
         Logger.log(applicationContext, "Worker finished ($reason)")
         return Result.success()
     }

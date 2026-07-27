@@ -25,14 +25,30 @@ object PrecisionScheduler {
     fun schedule(context: Context, watch: Watch) {
         val am = context.getSystemService(AlarmManager::class.java) ?: return
         val triggerAt = System.currentTimeMillis() + watch.intervalMinutes.toLong() * 60_000L
-        val show = PendingIntent.getActivity(
+        val operation = operation(context, watch.id)
+
+        // setAlarmClock is the most reliable (Doze-proof, no permission) but a few
+        // OEM builds throw. Never let that crash the app; fall back to an inexact
+        // Doze-aware alarm and record why in the log.
+        val exact = runCatching {
+            val show = PendingIntent.getActivity(
+                context,
+                0,
+                Intent(context, MainActivity::class.java),
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+            am.setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, show), operation)
+        }
+        if (exact.isSuccess) {
+            Logger.log(context, "Precision alarm set: ${watch.label} in ${watch.intervalMinutes} min")
+            return
+        }
+        Logger.log(
             context,
-            0,
-            Intent(context, MainActivity::class.java),
-            PendingIntent.FLAG_IMMUTABLE,
+            "Precision setAlarmClock failed (${exact.exceptionOrNull()?.message}); using inexact fallback",
         )
-        am.setAlarmClock(AlarmManager.AlarmClockInfo(triggerAt, show), operation(context, watch.id))
-        Logger.log(context, "Precision alarm set: ${watch.label} in ${watch.intervalMinutes} min")
+        runCatching { am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, operation) }
+            .onFailure { Logger.log(context, "Precision fallback alarm also failed (${it.message})") }
     }
 
     /** Schedule only if no alarm is already pending (used on app start / boot). */

@@ -14,7 +14,7 @@ class PoolPositionApp : Application() {
         Notifier.ensureChannel(this)
         // Touch the store so the example watch is seeded on first launch.
         val watches = WatchStore(this).load()
-        CheckScheduler.ensureScheduled(this)
+        CheckScheduler.syncPeriodic(this, watches)
         // Re-arm any precision watches whose exact-alarm chain isn't pending
         // (e.g. after the app was force-stopped and reopened).
         watches.filter { it.enabled && it.precision }

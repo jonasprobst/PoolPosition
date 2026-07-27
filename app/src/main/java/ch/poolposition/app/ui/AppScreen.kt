@@ -57,7 +57,7 @@ fun AppScreen(
     fun persist(newList: List<Watch>) {
         watches = newList
         store.save(newList)
-        CheckScheduler.reschedule(context)
+        CheckScheduler.syncPeriodic(context, newList)
     }
 
     // Keep the list in sync with the store, which the background worker updates
