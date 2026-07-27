@@ -81,8 +81,9 @@ class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, 
 
         if (precision) {
             if (alerted) {
-                result = result.copy(precision = false)
-                Logger.log(applicationContext, "  ${result.label}: precision fired — auto-stopping")
+                // Precision is one-shot: once it fires, turn the whole watch off.
+                result = result.copy(enabled = false)
+                Logger.log(applicationContext, "  ${result.label}: precision fired — watch disabled")
                 PrecisionScheduler.cancel(applicationContext, id)
             } else if (result.precision && result.enabled) {
                 PrecisionScheduler.schedule(applicationContext, result)

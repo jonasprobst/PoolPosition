@@ -90,7 +90,7 @@ class WatchStore(context: Context) {
             intervalMinutes = 15,
             mode = TriggerMode.DISAPPEARS,
             keyword = "Anmeldung noch nicht möglich",
-            enabled = true,
+            enabled = false,
         )
     }
 }

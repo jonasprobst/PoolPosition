@@ -12,10 +12,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,9 +31,16 @@ import androidx.compose.ui.unit.dp
 import ch.poolposition.app.model.TriggerMode
 import ch.poolposition.app.model.Watch
 
+// Interval presets per check mode: (minutes, label).
+private val STANDARD_PRESETS = listOf(15 to "15 min", 30 to "30 min", 60 to "1 h")
+private val PRECISION_PRESETS = listOf(1 to "1 min", 2 to "2 min", 5 to "5 min")
+private const val STANDARD_DEFAULT = 15
+private const val PRECISION_DEFAULT = 2
+
 /**
- * Add/edit dialog for a single watch. [isNew] toggles the Delete button.
- * Interval is clamped to the 15-minute minimum on save.
+ * Add/edit dialog for a single watch. The "How to check" segmented control picks
+ * the check mode (Standard vs Precision) and swaps the interval preset chips
+ * accordingly.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -42,13 +53,24 @@ fun WatchEditor(
 ) {
     var label by remember { mutableStateOf(initial.label) }
     var url by remember { mutableStateOf(initial.url) }
-    var intervalText by remember { mutableStateOf(initial.intervalMinutes.toString()) }
     var mode by remember { mutableStateOf(initial.mode) }
     var keyword by remember { mutableStateOf(initial.keyword) }
     var enabled by remember { mutableStateOf(initial.enabled) }
     var precision by remember { mutableStateOf(initial.precision) }
+    // Snap a legacy/odd interval to a valid preset for the current mode.
+    var intervalMinutes by remember {
+        mutableStateOf(
+            snapToPreset(initial.intervalMinutes, initial.precision),
+        )
+    }
 
-    val minInterval = if (precision) Watch.PRECISION_MIN_INTERVAL_MINUTES else Watch.MIN_INTERVAL_MINUTES
+    // Switching mode also moves the selected chip to that mode's valid set.
+    fun selectMode(toPrecision: Boolean) {
+        precision = toPrecision
+        intervalMinutes = snapToPreset(intervalMinutes, toPrecision)
+    }
+
+    val presets = if (precision) PRECISION_PRESETS else STANDARD_PRESETS
     val keywordRequired = mode != TriggerMode.CHANGED
     val canSave = label.isNotBlank() && url.isNotBlank() &&
         (!keywordRequired || keyword.isNotBlank())
@@ -76,14 +98,6 @@ fun WatchEditor(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
-                    value = intervalText,
-                    onValueChange = { new -> intervalText = new.filter(Char::isDigit) },
-                    label = { Text("Interval (minutes, min $minInterval)") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
 
                 Text("Trigger when the page…")
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -102,6 +116,39 @@ fun WatchEditor(
                     )
                 }
 
+                Text("How to check")
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        selected = !precision,
+                        onClick = { selectMode(false) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    ) { Text("Standard") }
+                    SegmentedButton(
+                        selected = precision,
+                        onClick = { selectMode(true) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    ) { Text("Precision") }
+                }
+                Text(
+                    if (precision) {
+                        "Exact timing, even in Doze. More battery; shows an alarm icon; " +
+                            "turns the watch off once it fires. Arm shortly before the change."
+                    } else {
+                        "Background checks, low battery. Keeps alerting on every change."
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                )
+
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    presets.forEach { (minutes, chipLabel) ->
+                        FilterChip(
+                            selected = intervalMinutes == minutes,
+                            onClick = { intervalMinutes = minutes },
+                            label = { Text(chipLabel) },
+                        )
+                    }
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -109,31 +156,12 @@ fun WatchEditor(
                     Switch(checked = enabled, onCheckedChange = { enabled = it })
                     Text(if (enabled) "Enabled" else "Disabled")
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Switch(checked = precision, onCheckedChange = { precision = it })
-                    Text(if (precision) "Precision on" else "Precision off")
-                }
-                if (precision) {
-                    Text(
-                        "Exact, Doze-proof checks (down to 1 min). Uses more battery and " +
-                            "shows an alarm icon; auto-stops once it fires. Turn on shortly " +
-                            "before the expected change.",
-                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                    )
-                }
             }
         },
         confirmButton = {
             TextButton(
                 enabled = canSave,
                 onClick = {
-                    val interval = intervalText.toIntOrNull()
-                        ?.coerceAtLeast(minInterval)
-                        ?: minInterval
                     // Changing URL/mode/keyword invalidates the stored baseline.
                     val baselineReset = url.trim() != initial.url ||
                         mode != initial.mode ||
@@ -142,7 +170,7 @@ fun WatchEditor(
                         initial.copy(
                             label = label.trim(),
                             url = url.trim(),
-                            intervalMinutes = interval,
+                            intervalMinutes = intervalMinutes,
                             mode = mode,
                             keyword = if (keywordRequired) keyword.trim() else "",
                             enabled = enabled,
@@ -164,6 +192,12 @@ fun WatchEditor(
             }
         },
     )
+}
+
+/** Return [minutes] if it's a valid preset for the mode, else that mode's default. */
+private fun snapToPreset(minutes: Int, precision: Boolean): Int {
+    val valid = (if (precision) PRECISION_PRESETS else STANDARD_PRESETS).map { it.first }
+    return if (minutes in valid) minutes else if (precision) PRECISION_DEFAULT else STANDARD_DEFAULT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

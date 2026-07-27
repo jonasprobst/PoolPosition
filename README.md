@@ -23,15 +23,15 @@ in your browser.
 - **High-priority, vibrating notification** on trigger; tap to open the URL.
 - Pre-seeded example: a **Test page** watch pointing at this repo's
   [GitHub Pages test page](https://jonasprobst.github.io/PoolPosition/), mode
-  `disappears`, keyword *"Anmeldung noch nicht möglich"* — so a fresh install is
-  testable immediately.
+  `disappears`, keyword *"Anmeldung noch nicht möglich"* — a ready-made example
+  (starts **disabled**; enable it to test).
 - **Check now** action (overflow menu) to force an immediate check of all
   watches without waiting for the interval — handy for testing.
-- **Precision mode** (per watch): for a time-critical opening, switch a watch to
-  exact, Doze-proof checks down to a 1-minute interval. Uses `AlarmManager`
-  alarm-clock scheduling (no special permission; shows an alarm icon while
-  armed), costs more battery, and auto-stops once the watch fires. Re-armed on
-  reboot and app start.
+- **Precision mode** (per watch): for a time-critical opening, switch a watch's
+  check style to exact, Doze-proof checks down to a 1-minute interval. Uses
+  `AlarmManager` alarm-clock scheduling (no special permission; shows an alarm
+  icon while armed), costs more battery, and is one-shot — it **turns the watch
+  off once it fires**. Re-armed on reboot and app start.
 
 ## Design decisions
 
