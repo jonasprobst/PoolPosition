@@ -46,7 +46,9 @@ fun WatchEditor(
     var mode by remember { mutableStateOf(initial.mode) }
     var keyword by remember { mutableStateOf(initial.keyword) }
     var enabled by remember { mutableStateOf(initial.enabled) }
+    var precision by remember { mutableStateOf(initial.precision) }
 
+    val minInterval = if (precision) Watch.PRECISION_MIN_INTERVAL_MINUTES else Watch.MIN_INTERVAL_MINUTES
     val keywordRequired = mode != TriggerMode.CHANGED
     val canSave = label.isNotBlank() && url.isNotBlank() &&
         (!keywordRequired || keyword.isNotBlank())
@@ -77,7 +79,7 @@ fun WatchEditor(
                 OutlinedTextField(
                     value = intervalText,
                     onValueChange = { new -> intervalText = new.filter(Char::isDigit) },
-                    label = { Text("Interval (minutes, min ${Watch.MIN_INTERVAL_MINUTES})") },
+                    label = { Text("Interval (minutes, min $minInterval)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
@@ -107,6 +109,22 @@ fun WatchEditor(
                     Switch(checked = enabled, onCheckedChange = { enabled = it })
                     Text(if (enabled) "Enabled" else "Disabled")
                 }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Switch(checked = precision, onCheckedChange = { precision = it })
+                    Text(if (precision) "Precision on" else "Precision off")
+                }
+                if (precision) {
+                    Text(
+                        "Exact, Doze-proof checks (down to 1 min). Uses more battery and " +
+                            "shows an alarm icon; auto-stops once it fires. Turn on shortly " +
+                            "before the expected change.",
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
         },
         confirmButton = {
@@ -114,8 +132,8 @@ fun WatchEditor(
                 enabled = canSave,
                 onClick = {
                     val interval = intervalText.toIntOrNull()
-                        ?.coerceAtLeast(Watch.MIN_INTERVAL_MINUTES)
-                        ?: Watch.MIN_INTERVAL_MINUTES
+                        ?.coerceAtLeast(minInterval)
+                        ?: minInterval
                     // Changing URL/mode/keyword invalidates the stored baseline.
                     val baselineReset = url.trim() != initial.url ||
                         mode != initial.mode ||
@@ -128,6 +146,7 @@ fun WatchEditor(
                             mode = mode,
                             keyword = if (keywordRequired) keyword.trim() else "",
                             enabled = enabled,
+                            precision = precision,
                             lastCheckedAt = if (baselineReset) 0L else initial.lastCheckedAt,
                             lastHash = if (baselineReset) null else initial.lastHash,
                             lastKeywordPresent = if (baselineReset) null else initial.lastKeywordPresent,

@@ -45,6 +45,7 @@ class WatchStore(context: Context) {
         put("mode", w.mode.name)
         put("keyword", w.keyword)
         put("enabled", w.enabled)
+        put("precision", w.precision)
         put("lastCheckedAt", w.lastCheckedAt)
         put("lastHash", w.lastHash ?: JSONObject.NULL)
         when (val p = w.lastKeywordPresent) {
@@ -63,6 +64,7 @@ class WatchStore(context: Context) {
             .getOrDefault(TriggerMode.CHANGED),
         keyword = o.optString("keyword", ""),
         enabled = o.optBoolean("enabled", true),
+        precision = o.optBoolean("precision", false),
         lastCheckedAt = o.optLong("lastCheckedAt", 0L),
         lastHash = if (o.isNull("lastHash")) null else o.optString("lastHash"),
         lastKeywordPresent = if (o.isNull("lastKeywordPresent")) null

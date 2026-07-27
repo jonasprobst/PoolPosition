@@ -25,6 +25,11 @@ in your browser.
   testable immediately.
 - **Check now** action (overflow menu) to force an immediate check of all
   watches without waiting for the interval — handy for testing.
+- **Precision mode** (per watch): for a time-critical opening, switch a watch to
+  exact, Doze-proof checks down to a 1-minute interval. Uses `AlarmManager`
+  alarm-clock scheduling (no special permission; shows an alarm icon while
+  armed), costs more battery, and auto-stops once the watch fires. Re-armed on
+  reboot and app start.
 
 ## Design decisions
 

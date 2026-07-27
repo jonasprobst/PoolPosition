@@ -32,6 +32,12 @@ data class Watch(
     /** Keyword for [TriggerMode.APPEARS] / [TriggerMode.DISAPPEARS]; ignored for CHANGED. */
     val keyword: String = "",
     val enabled: Boolean = true,
+    /**
+     * When true, this watch is driven by exact alarms (Doze-proof) instead of
+     * the shared 15-minute job, allowing sub-15-minute intervals. Higher battery
+     * use; auto-disables once the watch fires.
+     */
+    val precision: Boolean = false,
     /** Epoch millis of the last successful check; 0 means never checked. */
     val lastCheckedAt: Long = 0L,
     /** Baseline content hash for [TriggerMode.CHANGED]; null until first check. */
@@ -43,5 +49,6 @@ data class Watch(
 ) {
     companion object {
         const val MIN_INTERVAL_MINUTES = 15
+        const val PRECISION_MIN_INTERVAL_MINUTES = 1
     }
 }

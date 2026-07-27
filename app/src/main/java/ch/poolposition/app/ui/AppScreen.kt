@@ -35,6 +35,7 @@ import ch.poolposition.app.data.WatchStore
 import ch.poolposition.app.model.TriggerMode
 import ch.poolposition.app.model.Watch
 import ch.poolposition.app.work.CheckScheduler
+import ch.poolposition.app.work.PrecisionScheduler
 
 private class Editing(val watch: Watch, val isNew: Boolean)
 
@@ -150,6 +151,10 @@ fun AppScreen(
                         onClick = { editing = Editing(watch, isNew = false) },
                         onToggle = { on ->
                             persist(watches.map { if (it.id == watch.id) it.copy(enabled = on) else it })
+                            if (watch.precision) {
+                                if (on) PrecisionScheduler.schedule(context, watch.copy(enabled = true))
+                                else PrecisionScheduler.cancel(context, watch.id)
+                            }
                         },
                     )
                 }
@@ -178,9 +183,16 @@ fun AppScreen(
                         android.widget.Toast.LENGTH_SHORT,
                     ).show()
                 }
+                // Arm or disarm the exact-alarm chain for precision watches.
+                if (saved.enabled && saved.precision) {
+                    PrecisionScheduler.schedule(context, saved)
+                } else {
+                    PrecisionScheduler.cancel(context, saved.id)
+                }
                 editing = null
             },
             onDelete = {
+                PrecisionScheduler.cancel(context, current.watch.id)
                 persist(watches.filterNot { it.id == current.watch.id })
                 editing = null
             },
@@ -210,7 +222,7 @@ private fun WatchCard(watch: Watch, onClick: () -> Unit, onToggle: (Boolean) -> 
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "${modeLabel(watch)} · every ${watch.intervalMinutes} min",
+                    "${modeLabel(watch)} · ${if (watch.precision) "⚡ " else ""}every ${watch.intervalMinutes} min",
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
